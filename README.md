@@ -29,12 +29,18 @@ A collection of custom integrations and Lovelace UI elements designed to expand 
 2. Click the top-right menu (3 dots) and select **Custom repositories**.
 3. Paste the repository URL: `https://github.com/BndktCG/Home_Assistant_Custom_Elements`
 4. Set the Category to **Integration**.
-5. Find **Scene Saver** (or any other included integration) and click **Download**.
+5. Find **Scene Saver** and click **Download**.
 6. Restart Home Assistant.
+7. *(If the card is not detected automatically)* Go to **Settings** > **Dashboards** > **⋮ (three dots top right)** > **Resources** > **Add Resource**:
+   - **URL:** `/scene_saver/scene-saver-card.js`
+   - **Resource type:** `JavaScript-Modul` (JavaScript Module)
 
 ### Option 2: Manual Installation
 1. Copy the desired integration folder from `custom_components/` (e.g. `custom_components/scene_saver/`) into your Home Assistant `<config>/custom_components/` directory.
 2. Restart Home Assistant.
+3. Add the Lovelace resource under **Settings** > **Dashboards** > **⋮** > **Resources**:
+   - **URL:** `/scene_saver/scene-saver-card.js`
+   - **Resource type:** `JavaScript-Modul`
 
 ---
 

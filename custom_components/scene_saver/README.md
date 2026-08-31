@@ -25,10 +25,16 @@
 2. Add this repository as a custom repository if not in the default store.
 3. Search for **Scene Saver** and click **Download**.
 4. Restart Home Assistant.
+5. *(Optional/Fallback)* If the card is not found when adding cards, add the dashboard resource under **Settings** > **Dashboards** > **⋮ (three dots top right)** > **Resources**:
+   - **URL:** `/scene_saver/scene-saver-card.js`
+   - **Resource type:** `JavaScript Module`
 
 ### Method 2: Manual
 1. Copy the `custom_components/scene_saver` folder to your Home Assistant `<config>/custom_components/` directory.
 2. Restart Home Assistant.
+3. Register the Lovelace resource under **Settings** > **Dashboards** > **⋮** > **Resources**:
+   - **URL:** `/scene_saver/scene-saver-card.js`
+   - **Resource type:** `JavaScript Module`
 
 ---
 
