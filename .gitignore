@@ -1,0 +1,5 @@
+.ha_config/
+__pycache__/
+*.pyc
+.DS_Store
+.ha_token

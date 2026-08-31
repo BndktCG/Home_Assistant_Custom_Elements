@@ -1,0 +1,31 @@
+save_persistent_scene:
+  name: Save Persistent Scene
+  description: Saves the current state of lights in an area to a persistent scene in scenes.yaml.
+  fields:
+    name:
+      name: Name
+      description: The name of the new scene.
+      example: Evening Relax
+      required: true
+      selector:
+        text:
+    area_id:
+      name: Area
+      description: The area containing the lights to save.
+      required: true
+      selector:
+        area:
+    overwrite:
+      name: Overwrite
+      description: Whether to overwrite if a scene with the same name already exists.
+      required: false
+      default: false
+      selector:
+        boolean:
+    assign_to_area:
+      name: Assign to Area
+      description: Automatically assign the newly created scene to the selected area.
+      required: false
+      default: true
+      selector:
+        boolean:
