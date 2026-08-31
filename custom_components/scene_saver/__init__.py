@@ -49,13 +49,32 @@ async def _async_setup_common(hass: HomeAssistant):
     except Exception as e:
         _LOGGER.warning(f"Could not register static path (might already be registered): {e}")
 
-    # Automatically load the Lovelace card JS in the frontend
+    # Automatically load the Lovelace card JS in the frontend globally
     try:
         from homeassistant.components.frontend import add_extra_js_url
         add_extra_js_url(hass, "/scene_saver/scene-saver-card.js")
-        _LOGGER.info("Registered extra JS url for Scene Saver card")
     except Exception as e:
         _LOGGER.warning(f"Could not automatically register extra JS url: {e}")
+
+    # Register in Lovelace resources registry so it appears in dashboards without manual addition
+    async def register_lovelace_resource(event=None):
+        try:
+            if "lovelace" in hass.data:
+                lovelace_data = hass.data["lovelace"]
+                resources = getattr(lovelace_data, "resources", None) if hasattr(lovelace_data, "resources") else lovelace_data.get("resources", None) if isinstance(lovelace_data, dict) else None
+                if resources:
+                    if not resources.loaded:
+                        await resources.async_load()
+                    url = "/scene_saver/scene-saver-card.js"
+                    # Check if already registered
+                    if not any(res.url == url for res in resources.async_items()):
+                        await resources.async_create_item({"res_type": "module", "url": url})
+                        _LOGGER.info("Successfully added scene-saver-card to Lovelace resources")
+        except Exception as e:
+            _LOGGER.warning(f"Could not automatically add to Lovelace resources: {e}")
+
+    # Delay the lovelace registration slightly to ensure Lovelace component is fully loaded
+    hass.bus.async_listen_once("homeassistant_started", register_lovelace_resource)
 
     async def handle_save_scene(call: ServiceCall):
         """Handle the service call to save a persistent scene."""
@@ -115,12 +134,14 @@ async def _async_setup_common(hass: HomeAssistant):
         scenes_file = hass.config.path("scenes.yaml")
         scenes_data = []
         
-        if os.path.exists(scenes_file):
+        if await hass.async_add_executor_job(os.path.exists, scenes_file):
             try:
-                with open(scenes_file, "r", encoding="utf8") as f:
-                    scenes_data = yaml.safe_load(f) or []
-                    if not isinstance(scenes_data, list):
-                        scenes_data = [scenes_data]
+                def read_scenes():
+                    with open(scenes_file, "r", encoding="utf8") as f:
+                        return yaml.safe_load(f) or []
+                scenes_data = await hass.async_add_executor_job(read_scenes)
+                if not isinstance(scenes_data, list):
+                    scenes_data = [scenes_data]
             except Exception as e:
                 _LOGGER.error(f"Error reading scenes.yaml: {e}")
                 scenes_data = []
@@ -143,8 +164,10 @@ async def _async_setup_common(hass: HomeAssistant):
             scenes_data.append(new_scene)
             
         try:
-            with open(scenes_file, "w", encoding="utf8") as f:
-                yaml.safe_dump(scenes_data, f, default_flow_style=False, allow_unicode=True)
+            def write_scenes():
+                with open(scenes_file, "w", encoding="utf8") as f:
+                    yaml.safe_dump(scenes_data, f, default_flow_style=False, allow_unicode=True)
+            await hass.async_add_executor_job(write_scenes)
         except Exception as e:
             _LOGGER.error(f"Error writing to scenes.yaml: {e}")
             return
